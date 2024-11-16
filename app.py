@@ -1,23 +1,17 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
-# Sample data
-data = {
-    "Name": ["John Doe", "Jane Smith", "Emily Davis", "Michael Brown"],
-    "Age": [34, 29, 42, 36],
-    "Gender": ["Male", "Female", "Female", "Male"],
-    "Last Visit": ["2024-10-15", "2024-10-10", "2024-11-01", "2024-10-20"],
-    "Next Appointment": ["2024-11-20", "2024-11-25", "2024-11-30", "2024-11-22"],
-    "Notes": [
-        "Needs follow-up on test results",
-        "Routine check-up",
-        "Dietary consultation",
-        "Blood pressure monitoring"
-    ],
-}
+# Load data
+def load_data():
+    return pd.read_csv("database.csv")
 
-# Convert data to DataFrame
-df = pd.DataFrame(data)
+# Save data
+def save_data(df):
+    df.to_csv("database.csv", index=False)
+
+# Initialize data
+df = load_data()
 
 # Streamlit App
 st.title("Clinic Data Dashboard")
@@ -45,8 +39,8 @@ elif choice == "Add Client":
         name = st.text_input("Name")
         age = st.number_input("Age", min_value=0, max_value=120)
         gender = st.selectbox("Gender", ["Male", "Female"])
-        last_visit = st.date_input("Last Visit")
-        next_appointment = st.date_input("Next Appointment")
+        last_visit = st.date_input("Last Visit", datetime.now())
+        next_appointment = st.date_input("Next Appointment", datetime.now())
         notes = st.text_area("Notes")
         submit_button = st.form_submit_button("Add Client")
 
@@ -61,6 +55,7 @@ elif choice == "Add Client":
             "Notes": notes,
         }
         df = df.append(new_data, ignore_index=True)
+        save_data(df)  # Save to CSV
         st.success(f"Client {name} added successfully!")
 
 elif choice == "Contact":
@@ -70,4 +65,3 @@ elif choice == "Contact":
     - **Email**: clinic@example.com
     - **Address**: 123 Health Street, Wellness City
     """)
-
