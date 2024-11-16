@@ -41,7 +41,7 @@ def save_data_to_github(df, filename):
     """Save the updated DataFrame to GitHub."""
     # Load GitHub token from Streamlit secrets
     token = st.secrets["GITHUB_TOKEN"]
-    repo = "your_username/your_repo_name"  # Replace with your repository
+    repo = "habdulhaq87/clinicapp"  # Replace with your repository
     path = filename
 
     # Get the file SHA for updating the existing file
