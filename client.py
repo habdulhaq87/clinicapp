@@ -41,17 +41,23 @@ def save_data_to_github(df, filename):
     """Save the updated DataFrame to GitHub."""
     # Load GitHub token from Streamlit secrets
     token = st.secrets["GITHUB_TOKEN"]
-    repo = "habdulhaq87/clinicapp"  # Replace with your repository
-    path = filename
+    repo = "habdulhaq87/clinicapp"  # Your GitHub repository
+    path = filename  # e.g., "database.csv" or "data/database.csv" if in a subfolder
 
     # Get the file SHA for updating the existing file
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
     headers = {"Authorization": f"token {token}"}
     response = requests.get(url, headers=headers)
+
     if response.status_code == 200:
         sha = response.json()["sha"]
+        st.info(f"File found in GitHub. SHA: {sha}")
+    elif response.status_code == 404:
+        sha = None  # If the file does not exist, prepare to create it
+        st.warning("File not found in GitHub. It will be created.")
     else:
-        sha = None  # If file does not exist, create a new one
+        st.error(f"Failed to retrieve file details. Response: {response.json()}")
+        return
 
     # Encode the updated DataFrame as a string
     content = df.to_csv(index=False).encode("utf-8").decode("utf-8")
