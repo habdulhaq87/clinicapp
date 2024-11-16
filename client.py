@@ -2,7 +2,6 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 import requests
-import os
 
 def add_client(df, save_data):
     """Page for adding a new client to the database."""
@@ -38,11 +37,11 @@ def add_client(df, save_data):
             st.balloons()
     return df
 
-def save_data_to_github(df, filename="database.csv"):
+def save_data_to_github(df, filename):
     """Save the updated DataFrame to GitHub."""
-    # Load GitHub token and repo details from Streamlit secrets
+    # Load GitHub token from Streamlit secrets
     token = st.secrets["GITHUB_TOKEN"]
-    repo = st.secrets["GITHUB_REPO"]
+    repo = "your_username/your_repo_name"  # Replace with your repository
     path = filename
 
     # Get the file SHA for updating the existing file
