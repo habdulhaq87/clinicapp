@@ -49,3 +49,13 @@ elif choice == "➕ Add Client":
 
 elif choice == "📞 Contact Info":
     show_contact_info()
+
+# Default content if no button is clicked (optional)
+if not choice:
+    st.title("Welcome to the Clinic Dashboard")
+    st.markdown("""
+    Use the sidebar to navigate between pages:
+    - View and search client data
+    - Add new clients
+    - View contact information
+    """)
