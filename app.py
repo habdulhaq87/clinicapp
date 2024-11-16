@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 from client import add_client
 from contact import show_contact_info
+from style import apply_custom_style
+
+# Apply custom styles
+apply_custom_style()
 
 # Load data
 def load_data():
