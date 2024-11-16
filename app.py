@@ -4,6 +4,7 @@ from sidebar import sidebar_navigation
 from client import add_client, save_data_to_github
 from contact import show_contact_info
 from style import apply_custom_style
+from datetime import datetime
 
 # Set page configuration (must be the first Streamlit command)
 st.set_page_config(
@@ -35,7 +36,6 @@ def login():
         else:
             st.error("Invalid access key. Please try again.")
 
-# Main application
 def main():
     # Load data
     def load_data():
@@ -57,14 +57,47 @@ def main():
         st.dataframe(df, use_container_width=True)
 
         # Filter options
-        st.markdown("### 🔍 Search Clients")
+        st.markdown("### 🔍 Search Filters")
         with st.expander("Click to filter clients"):
+            # Name Filter
             name_filter = st.text_input("Search by Name")
-            if name_filter:
-                filtered_data = df[df["Name"].str.contains(name_filter, case=False)]
-                st.dataframe(filtered_data, use_container_width=True)
-            else:
-                st.info("No filter applied. Showing all clients.")
+            
+            # Age Range Filter
+            min_age, max_age = st.slider(
+                "Select Age Range", 
+                min_value=int(df["Age"].min()), 
+                max_value=int(df["Age"].max()), 
+                value=(int(df["Age"].min()), int(df["Age"].max()))
+            )
+            
+            # Gender Filter
+            gender_filter = st.multiselect(
+                "Filter by Gender", 
+                options=df["Gender"].unique(), 
+                default=df["Gender"].unique()
+            )
+
+            # Last Visit Date Range Filter
+            min_date = datetime.strptime(df["Last Visit"].min(), "%Y-%m-%d").date()
+            max_date = datetime.strptime(df["Last Visit"].max(), "%Y-%m-%d").date()
+            start_date, end_date = st.date_input(
+                "Select Last Visit Date Range", 
+                value=(min_date, max_date), 
+                min_value=min_date, 
+                max_value=max_date
+            )
+
+            # Apply filters to DataFrame
+            filtered_data = df[
+                (df["Name"].str.contains(name_filter, case=False, na=False)) &
+                (df["Age"] >= min_age) & (df["Age"] <= max_age) &
+                (df["Gender"].isin(gender_filter)) &
+                (pd.to_datetime(df["Last Visit"]) >= pd.to_datetime(start_date)) &
+                (pd.to_datetime(df["Last Visit"]) <= pd.to_datetime(end_date))
+            ]
+
+            # Display filtered data
+            st.dataframe(filtered_data, use_container_width=True)
 
     elif choice == "➕ Add Client":
         # Update both local and GitHub-stored data
