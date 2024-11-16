@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from client import add_client
+from contact import show_contact_info
 
 # Load data
 def load_data():
@@ -29,9 +30,6 @@ choice = st.sidebar.radio("Navigate to:", menu)
 
 if choice == "📊 Client Overview":
     st.subheader("Client Overview")
-    st.markdown("### 👥 All Clients")
-
-    # Display the data in an interactive table
     st.dataframe(df, use_container_width=True)
 
     # Filter options
@@ -45,48 +43,7 @@ if choice == "📊 Client Overview":
             st.info("No filter applied. Showing all clients.")
 
 elif choice == "➕ Add Client":
-    st.subheader("Add a New Client")
-    st.markdown("### 📝 Client Registration Form")
-
-    # Input form
-    with st.form("add_client_form"):
-        name = st.text_input("Name", placeholder="Enter full name")
-        age = st.number_input("Age", min_value=0, max_value=120, step=1, help="Enter the client's age")
-        gender = st.selectbox("Gender", ["Male", "Female"], help="Select the client's gender")
-        last_visit = st.date_input("Last Visit", datetime.now())
-        next_appointment = st.date_input("Next Appointment", datetime.now())
-        notes = st.text_area("Notes", placeholder="Enter any additional notes")
-        submit_button = st.form_submit_button("Submit")
-
-    # Handle form submission
-    if submit_button:
-        if name.strip() == "":
-            st.error("⚠️ Name cannot be empty.")
-        else:
-            new_data = {
-                "Name": name,
-                "Age": age,
-                "Gender": gender,
-                "Last Visit": last_visit.strftime("%Y-%m-%d"),
-                "Next Appointment": next_appointment.strftime("%Y-%m-%d"),
-                "Notes": notes,
-            }
-            df = df.append(new_data, ignore_index=True)
-            save_data(df)  # Save to CSV
-            st.success(f"✅ Client {name} has been added successfully!")
-            st.balloons()
+    df = add_client(df, save_data)
 
 elif choice == "📞 Contact Info":
-    st.subheader("Contact Information")
-    st.markdown("""
-    ### 🏢 Clinic Details
-    - **📞 Phone**: +123 456 7890  
-    - **📧 Email**: clinic@example.com  
-    - **📍 Address**: 123 Health Street, Wellness City  
-    """)
-    st.image("content/image.jpg", caption="Our Clinic", use_column_width=True)
-
-
-# Footer
-st.sidebar.markdown("---")
-st.sidebar.markdown("© 2024 Clinic Dashboard")
+    show_contact_info()
