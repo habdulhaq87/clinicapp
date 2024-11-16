@@ -1,13 +1,20 @@
 import streamlit as st
 
 def sidebar_navigation():
-    """Create and handle sidebar navigation with contact info and an image."""
+    """Create and handle sidebar navigation with buttons, contact info, and an image."""
     # App title in the sidebar
     st.sidebar.title("🏥 Clinic Dashboard")
 
-    # Navigation menu
-    menu = ["📊 Client Overview", "➕ Add Client", "📞 Contact Info"]
-    choice = st.sidebar.radio("Navigate to:", menu)
+    # Divider
+    st.sidebar.markdown("---")
+
+    # Navigation Buttons
+    if st.sidebar.button("📊 Client Overview"):
+        return "📊 Client Overview"
+    if st.sidebar.button("➕ Add Client"):
+        return "➕ Add Client"
+    if st.sidebar.button("📞 Contact Info"):
+        return "📞 Contact Info"
 
     # Divider
     st.sidebar.markdown("---")
@@ -23,4 +30,4 @@ def sidebar_navigation():
     # Display Image
     st.sidebar.image("content/image.jpg", caption="Our Clinic", use_column_width=True)
 
-    return choice
+    return None
