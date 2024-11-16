@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from sidebar import sidebar_navigation
 from client import add_client
 from contact import show_contact_info
 from style import apply_custom_style
@@ -25,15 +26,12 @@ def save_data(df):
 # Initialize data
 df = load_data()
 
-st.title("🏥 Clinic Data Dashboard")
-st.sidebar.title("📋 Dashboard Navigation")
+# Sidebar Navigation
+choice = sidebar_navigation()
 
-# Navigation
-menu = ["📊 Client Overview", "➕ Add Client", "📞 Contact Info"]
-choice = st.sidebar.radio("Navigate to:", menu)
-
+# Main Content
 if choice == "📊 Client Overview":
-    st.subheader("Client Overview")
+    st.title("Client Overview")
     st.dataframe(df, use_container_width=True)
 
     # Filter options
