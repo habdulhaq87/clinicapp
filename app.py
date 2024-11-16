@@ -4,6 +4,13 @@ from client import add_client
 from contact import show_contact_info
 from style import apply_custom_style
 
+# Set page configuration (must be the first Streamlit command)
+st.set_page_config(
+    page_title="Clinic Dashboard",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Apply custom styles
 apply_custom_style()
 
@@ -17,13 +24,6 @@ def save_data(df):
 
 # Initialize data
 df = load_data()
-
-# Streamlit App
-st.set_page_config(
-    page_title="Clinic Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 st.title("🏥 Clinic Data Dashboard")
 st.sidebar.title("📋 Dashboard Navigation")
