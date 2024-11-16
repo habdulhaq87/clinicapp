@@ -49,4 +49,9 @@ def apply_custom_style():
     }
 
     .stAlert {
-        border-radi
+        border-radius: 10px;
+        border-left: 6px solid #e76f51;
+    }
+    </style>
+    """
+    st.markdown(custom_css, unsafe_allow_html=True)
