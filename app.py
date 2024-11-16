@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import requests
 from sidebar import sidebar_navigation
 from client import add_client
 from contact import show_contact_info
@@ -17,11 +18,47 @@ apply_custom_style()
 
 # Load data
 def load_data():
+    """Load the database from a local file."""
     return pd.read_csv("database.csv")
 
-# Save data
-def save_data(df):
+# Save data locally
+def save_data_local(df):
+    """Save the database locally."""
     df.to_csv("database.csv", index=False)
+
+# Save data to GitHub
+def save_data_to_github(df, filename="database.csv"):
+    """Save the updated DataFrame to GitHub using the token stored in Streamlit secrets."""
+    # Load GitHub token and repository details
+    token = st.secrets["GITHUB_TOKEN"]
+    repo = st.secrets["GITHUB_REPO"]
+    path = filename
+
+    # Get the file SHA for updating the existing file
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {"Authorization": f"token {token}"}
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        sha = response.json()["sha"]
+    else:
+        sha = None  # File does not exist
+
+    # Encode the updated DataFrame as a string
+    content = df.to_csv(index=False).encode("utf-8").decode("utf-8")
+    data = {
+        "message": "Update database.csv",
+        "content": content.encode("utf-8").decode("utf-8"),
+        "sha": sha,
+    }
+
+    # Push the updated content to GitHub
+    response = requests.put(url, json=data, headers=headers)
+    if response.status_code == 200:
+        st.success("Database successfully updated on GitHub!")
+    else:
+        st.error("Failed to update the database on GitHub.")
+        st.error(response.json())
 
 # Initialize data
 df = load_data()
@@ -45,7 +82,7 @@ if choice == "📊 Client Overview":
             st.info("No filter applied. Showing all clients.")
 
 elif choice == "➕ Add Client":
-    df = add_client(df, save_data)
+    df = add_client(df, lambda updated_df: save_data_to_github(updated_df, "database.csv"))
 
 elif choice == "📞 Contact Info":
     show_contact_info()
