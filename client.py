@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime
 import pandas as pd
 import requests
+import base64
 
 def add_client(df, save_data):
     """Page for adding a new client to the database."""
@@ -59,11 +60,14 @@ def save_data_to_github(df, filename):
         st.error(f"Failed to retrieve file details. Response: {response.json()}")
         return
 
-    # Encode the updated DataFrame as a string
-    content = df.to_csv(index=False).encode("utf-8").decode("utf-8")
+    # Encode the updated DataFrame as Base64
+    content = df.to_csv(index=False).encode("utf-8")
+    base64_content = base64.b64encode(content).decode("utf-8")
+
+    # Prepare data for the PUT request
     data = {
         "message": "Update database.csv",
-        "content": content.encode("utf-8").decode("utf-8"),
+        "content": base64_content,
         "sha": sha,
     }
 
