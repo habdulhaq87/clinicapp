@@ -12,33 +12,31 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Instruction: Require Access Key
-def require_access_key():
-    """Prompt user to enter an access key to access the app."""
-    st.title("🔒 Secure Access")
-    st.markdown("""
-    This application is secured. You need a valid access key to proceed.  
-    If you don't have an access key, please contact the administrator.
-    """)
-    access_key = st.text_input("Enter your access key:", type="password")
-    if st.button("Submit"):
-        if access_key == st.secrets["ACCESS_KEY"]:
-            st.session_state["authenticated"] = True
-            st.success("Access granted!")
-            st.experimental_rerun()
-        else:
-            st.error("Invalid access key. Please try again.")
-
 # Apply custom styles
 apply_custom_style()
 
-# Check if the user is authenticated
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
+# Access key for securing the app
+ACCESS_KEY = "clinic2024"
 
-if not st.session_state["authenticated"]:
-    require_access_key()
-else:
+def login():
+    """Display login prompt and validate access key."""
+    st.title("🔒 Secure Clinic Dashboard")
+    st.markdown("""
+    ## Welcome to the Clinic Dashboard!
+    This application is secured. Please enter the access key to proceed.
+    """)
+
+    # Access key input
+    password = st.text_input("Enter Access Key:", type="password")
+    if st.button("Login"):
+        if password == ACCESS_KEY:
+            st.success("Access granted! Redirecting...")
+            st.session_state["authenticated"] = True
+        else:
+            st.error("Invalid access key. Please try again.")
+
+# Main application
+def main():
     # Load data
     def load_data():
         return pd.read_csv("database.csv")
@@ -84,3 +82,12 @@ else:
         - Add new clients
         - View contact information
         """)
+
+# Check authentication status
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    login()
+else:
+    main()
