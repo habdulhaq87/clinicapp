@@ -12,51 +12,75 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Instruction: Require Access Key
+def require_access_key():
+    """Prompt user to enter an access key to access the app."""
+    st.title("🔒 Secure Access")
+    st.markdown("""
+    This application is secured. You need a valid access key to proceed.  
+    If you don't have an access key, please contact the administrator.
+    """)
+    access_key = st.text_input("Enter your access key:", type="password")
+    if st.button("Submit"):
+        if access_key == st.secrets["ACCESS_KEY"]:
+            st.session_state["authenticated"] = True
+            st.success("Access granted!")
+            st.experimental_rerun()
+        else:
+            st.error("Invalid access key. Please try again.")
+
 # Apply custom styles
 apply_custom_style()
 
-# Load data
-def load_data():
-    return pd.read_csv("database.csv")
+# Check if the user is authenticated
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
 
-# Save data locally
-def save_data(df):
-    df.to_csv("database.csv", index=False)
+if not st.session_state["authenticated"]:
+    require_access_key()
+else:
+    # Load data
+    def load_data():
+        return pd.read_csv("database.csv")
 
-# Initialize data
-df = load_data()
+    # Save data locally
+    def save_data(df):
+        df.to_csv("database.csv", index=False)
 
-# Sidebar Navigation
-choice = sidebar_navigation()
+    # Initialize data
+    df = load_data()
 
-# Main Content
-if choice == "📊 Client Overview":
-    st.title("Client Overview")
-    st.dataframe(df, use_container_width=True)
+    # Sidebar Navigation
+    choice = sidebar_navigation()
 
-    # Filter options
-    st.markdown("### 🔍 Search Clients")
-    with st.expander("Click to filter clients"):
-        name_filter = st.text_input("Search by Name")
-        if name_filter:
-            filtered_data = df[df["Name"].str.contains(name_filter, case=False)]
-            st.dataframe(filtered_data, use_container_width=True)
-        else:
-            st.info("No filter applied. Showing all clients.")
+    # Main Content
+    if choice == "📊 Client Overview":
+        st.title("Client Overview")
+        st.dataframe(df, use_container_width=True)
 
-elif choice == "➕ Add Client":
-    # Update both local and GitHub-stored data
-    df = add_client(df, lambda updated_df: save_data_to_github(updated_df, "database.csv"))
+        # Filter options
+        st.markdown("### 🔍 Search Clients")
+        with st.expander("Click to filter clients"):
+            name_filter = st.text_input("Search by Name")
+            if name_filter:
+                filtered_data = df[df["Name"].str.contains(name_filter, case=False)]
+                st.dataframe(filtered_data, use_container_width=True)
+            else:
+                st.info("No filter applied. Showing all clients.")
 
-elif choice == "📞 Contact Info":
-    show_contact_info()
+    elif choice == "➕ Add Client":
+        # Update both local and GitHub-stored data
+        df = add_client(df, lambda updated_df: save_data_to_github(updated_df, "database.csv"))
 
-# Default content if no button is clicked (optional)
-if not choice:
-    st.title("Welcome to the Clinic Dashboard")
-    st.markdown("""
-    Use the sidebar to navigate between pages:
-    - View and search client data
-    - Add new clients
-    - View contact information
-    """)
+    elif choice == "📞 Contact Info":
+        show_contact_info()
+
+    # Default content if no button is clicked (optional)
+    if not choice:
+        st.title("Welcome to the Clinic Dashboard")
+        st.markdown("""
+        Use the sidebar to navigate between pages:
+        - View and search client data
+        - Add new clients
+        - View contact information
+        """)
