@@ -1,5 +1,8 @@
 import streamlit as st
 from datetime import datetime
+import pandas as pd
+import requests
+import os
 
 def add_client(df, save_data):
     """Page for adding a new client to the database."""
@@ -19,16 +22,50 @@ def add_client(df, save_data):
         if name.strip() == "":
             st.error("⚠️ Name cannot be empty.")
         else:
-            new_data = {
+            new_data = pd.DataFrame([{
                 "Name": name,
                 "Age": age,
                 "Gender": gender,
                 "Last Visit": last_visit.strftime("%Y-%m-%d"),
                 "Next Appointment": next_appointment.strftime("%Y-%m-%d"),
                 "Notes": notes,
-            }
-            df = df.append(new_data, ignore_index=True)
-            save_data(df)
+            }])
+
+            # Add the new row to the DataFrame
+            df = pd.concat([df, new_data], ignore_index=True)
+            save_data(df)  # Save to GitHub
             st.success(f"✅ Client {name} has been added successfully!")
             st.balloons()
     return df
+
+def save_data_to_github(df, filename="database.csv"):
+    """Save the updated DataFrame to GitHub."""
+    # Load GitHub token and repo details from Streamlit secrets
+    token = st.secrets["GITHUB_TOKEN"]
+    repo = st.secrets["GITHUB_REPO"]
+    path = filename
+
+    # Get the file SHA for updating the existing file
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {"Authorization": f"token {token}"}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        sha = response.json()["sha"]
+    else:
+        sha = None  # If file does not exist, create a new one
+
+    # Encode the updated DataFrame as a string
+    content = df.to_csv(index=False).encode("utf-8").decode("utf-8")
+    data = {
+        "message": "Update database.csv",
+        "content": content.encode("utf-8").decode("utf-8"),
+        "sha": sha,
+    }
+
+    # Push the updated content to GitHub
+    response = requests.put(url, json=data, headers=headers)
+    if response.status_code == 200:
+        st.success("Database successfully updated on GitHub!")
+    else:
+        st.error("Failed to update the database on GitHub.")
+        st.error(response.json())
